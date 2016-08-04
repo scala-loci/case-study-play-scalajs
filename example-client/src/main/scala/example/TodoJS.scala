@@ -55,7 +55,7 @@ object TodoJS {
       val json = write(Task(None, txt, done))
       Ajax.postAsJson(Routes.Todos.create, json).map{ r =>
         tasks() = read[Task](r.responseText) +: tasks()
-      }.recover{case e: AjaxException => dom.alert(e.xhr.responseText)}
+      }.recover{case e: AjaxException => dom.window.alert(e.xhr.responseText)}
     }
 
     def update(task: Task) = {
@@ -112,7 +112,7 @@ object TodoJS {
         `type`:="checkbox",
         cursor:="pointer",
         onclick := { () =>
-          val target = Model.tasks().exists(_.done == false)
+//          val target = Model.tasks().exists(_.done == false)
 //          Var.set(tasks().map(_.done -> target): _*)
         }
       ),
@@ -142,7 +142,7 @@ object TodoJS {
             else ""
           },
           div(`class` := "view")(
-            "ondblclick".attr := { () =>
+            ondblclick := { () =>
               Model.editing() = Some(task)
             },
             input(`class`:= "toggle", `type`:= "checkbox", cursor:= "pointer", onchange:= { () =>

@@ -9,9 +9,9 @@ resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/release
 //addSbtPlugin("com.github.mpeltonen" % "sbt-idea" % "1.7.0-SNAPSHOT")
 
 // Sbt plugins
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.4.2")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.5.4")
 
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.5")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.11")
 
 addSbtPlugin("com.vmunier" % "sbt-play-scalajs" % "0.2.8")
 

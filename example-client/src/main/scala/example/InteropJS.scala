@@ -3,6 +3,7 @@ package example
 import scala.scalajs.js
 import scala.scalajs.js.JSON
 import scala.scalajs.js.annotation.JSExport
+import scala.scalajs.js.annotation.ScalaJSDefined
 import org.scalajs.dom
 import scalatags.JsDom._
 import all._
@@ -24,7 +25,7 @@ object ScalaJSInterop {
 //    new Alert("Hello this is native javascript alert")
 
     val bob = new Person("Bob")
-//    dom.alert(bob.firstName)
+//    dom.window.alert(bob.firstName)
 //    bob.walk()
 //    bob.sayHello()
     val student = new Student("Alice", "Biology")
@@ -37,7 +38,7 @@ object ScalaJSInterop {
   @JSExport
   def main(foo: js.Dynamic) = {
 //    foo.listInt.asInstanceOf[js.Array[Int]](2).toString
-    dom.alert(JSON.stringify(foo))
+    dom.window.alert(JSON.stringify(foo))
     dom.document.body.appendChild(template.render)
     runScript
   }
@@ -49,14 +50,17 @@ object ScalaJSInterop {
  * This represents Foo class in javascript
  * You must not declare it as nested class
  */
+@ScalaJSDefined
 class Foo extends js.Object {
   def test: Unit = {
-    dom.alert("Test add-hoc method") /* deprecated */
+    dom.window.alert("Test add-hoc method") /* deprecated */
   }
 }
 
+@js.native
 class Alert(msg: String) extends js.Object {}
 
+@js.native
 class Person(val firstName: String) extends js.Object{
   /**
    * The method must have () and Unit as return type in case it returns nothing
@@ -68,6 +72,7 @@ class Person(val firstName: String) extends js.Object{
   def sayHello(): Unit = js.native
 }
 
+@js.native
 class Student(firstName: String, val subject: String) extends Person(firstName) {
   def sayGoodBye(): Unit = js.native
 
@@ -83,6 +88,7 @@ import org.scalajs.dom._
  *
  * MDN
  */
+@js.native
 class MessageEvent extends Event {
   def source: Window = js.native
 

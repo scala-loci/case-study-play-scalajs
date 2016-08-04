@@ -112,7 +112,7 @@ object HangmanJS {
             Model.start()
             goto(pageGuess)
           }else{
-            dom.alert("Please select level!")
+            dom.window.alert("Please select level!")
           }
         })
       )

@@ -3,6 +3,7 @@ package controllers
 import play.api.http.{Writeable, ContentTypes, ContentTypeOf}
 import play.api.libs.json.JsError
 import play.api.mvc.{Request, Codec}
+import akka.util.ByteString
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object `package` {
@@ -15,13 +16,13 @@ object `package` {
     ContentTypeOf[Throwable](Some(ContentTypes.TEXT))
 
   implicit def writeableOf_Throwable(implicit codec: Codec): Writeable[Throwable] = {
-    Writeable(e => e.getMessage.getBytes("utf-8"))
+    Writeable(e => ByteString(e.getMessage.getBytes))
   }
 
   implicit def contentTypeOf_JsError(implicit codec: Codec): ContentTypeOf[JsError] =
     ContentTypeOf[JsError](Some(ContentTypes.JSON))
 
   implicit def writeableOf_JsError(implicit codec: Codec): Writeable[JsError] = {
-    Writeable(e => JsError.toFlatJson(e).toString.getBytes("utf-8"))
+    Writeable(e => ByteString(JsError.toFlatJson(e).toString.getBytes))
   }
 }

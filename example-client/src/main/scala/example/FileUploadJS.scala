@@ -21,15 +21,15 @@ object FileUploadJS {
     ),
     p("""This is a demonstration of the HTML5 file drag & drop API with asynchronous Ajax file uploads,
       graphical progress bars and progressive enhancement."""),
-    form(id:= "upload", action:=s"/upload", "role".attr:="form",
-      "method".attr:="POST", "enctype".attr:="multipart/form-data")(
+    form(id:= "upload", action:=s"/upload", role:="form",
+      method:="POST", enctype:="multipart/form-data")(
       input(`type`:="hidden", name:="csrfToken", value:=csrfToken),
       div(`class`:="panel panel-info")(
         div(`class`:="panel-heading")(h3(`class`:="panel-title", "HTML File Upload")),
         div(`class`:="panel-body")(
           div (
             label(`for` := "", "Files to upload:"),
-            input(`type` := "file", id := "fileSelect", name := "fileSelect", "multiple".attr := "multiple")
+            input(`type` := "file", id := "fileSelect", name := "fileSelect", multiple := "multiple")
           ),
           div(id := "submitButton", `class`:="hide") (
             button(`type` := "submit")("Upload Files")
@@ -42,17 +42,20 @@ object FileUploadJS {
       )
     ),
     div(`class`:="progress")(
-      div(id:="progress", `class`:="progress-bar progress-bar-success progress-bar-striped", "role".attr:="progressbar", "aria-valuenow".attr:="0",
-        "aria-valuemin".attr:="0", "aria-valuemax".attr:="100", style:="width: 100%", "0%")
+      div(id:="progress", `class`:="progress-bar progress-bar-success progress-bar-striped", role:="progressbar", attr("aria-valuenow"):="0",
+        attr("aria-valuemin"):="0", attr("aria-valuemax"):="100", style:="width: 100%", "0%")
     ),
     h4("Status Messages")(span(style:="margin-left:15px;"), span(id:="status", `class`:="label hide", "Done")),
     div(id:="messages", `class`:="alert alert-info")
   )
 
+  @js.native
   trait EventTargetExt extends dom.EventTarget {
     var files: dom.FileList = js.native
 
   }
+
+  @js.native
   trait EventExt extends dom.Event {
     var dataTransfer: dom.DataTransfer = js.native
 
@@ -96,7 +99,7 @@ object FileUploadJS {
         try {
           parseFile(files(i))
           if(demo){
-            dom.alert("Not allow file upload in demo mode")
+            dom.window.alert("Not allow file upload in demo mode")
           }else{
             uploadFile(files(i))
           }

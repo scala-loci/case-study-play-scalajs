@@ -22,7 +22,7 @@ object ChatJS {
   var client: Option[ChatClient] = None
 
   def signInPanel = div(id:="signInPanel"){
-    form(`class`:="form-inline", "role".attr:="form")(
+    form(`class`:="form-inline", role:="form")(
       div(id:="usernameForm", `class`:="form-group")(
         div(`class`:="input-group")(
           div(`class`:="input-group-addon", raw("&#9786;")),
@@ -37,7 +37,7 @@ object ChatJS {
         val input = $("#username").value().toString.trim
         if(input == "") {
           $("#usernameForm").addClass("has-error")
-          dom.alert("Invalid username")
+          dom.window.alert("Invalid username")
         }else{
           $("#usernameForm").removeClass("has-error")
           client = ChatClient.connect(wsBaseUrl, input).map{ c =>
@@ -118,7 +118,7 @@ object ChatJS {
         }
       }catch{
         case e: Throwable => {
-          dom.alert("Unable to connect because "+e.toString)
+          dom.window.alert("Unable to connect because "+e.toString)
           None
         }
       }
@@ -129,7 +129,7 @@ object ChatJS {
       val data = js.JSON.parse(e.data.toString)
       dom.console.log(data)
       if(data.error.toString != "undefined"){
-        dom.alert(data.error.toString)
+        dom.window.alert(data.error.toString)
         singOut
       }else{
         val user = data.user.name.toString
