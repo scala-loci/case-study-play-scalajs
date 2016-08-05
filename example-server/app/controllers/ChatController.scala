@@ -25,16 +25,16 @@ object ChatController extends Controller {
     }.recover{ case e => Left(Ok(e))}
   }
 
-  def chatSSE(username: String) = Action.async { request =>
-    ChatRoom.join(username).map{ io =>
-      Ok.feed(io._2
-        &> Concurrent.buffer(50)
-        &> Enumeratee.onIterateeDone{ () =>
-          play.Logger.info(request.remoteAddress + " - SSE disconnected")
-        }
-        &> EventSource()).as("text/event-stream")
-    }.recover{ case e => BadRequest(e)}
-  }
+//  def chatSSE(username: String) = Action.async { request =>
+//    ChatRoom.join(username).map{ io =>
+//      Ok.feed(io._2
+//        &> Concurrent.buffer(50)
+//        &> Enumeratee.onIterateeDone{ () =>
+//          play.Logger.info(request.remoteAddress + " - SSE disconnected")
+//        }
+//        &> EventSource()).as("text/event-stream")
+//    }.recover{ case e => BadRequest(e)}
+//  }
 
   val talkForm = Form(
     tuple(

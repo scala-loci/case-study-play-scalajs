@@ -29,9 +29,9 @@ object ChatJS {
           input(id:="username", `class`:="form-control", `type`:="text", placeholder:="Enter username")
         )
       ),
-      span(style:="margin:0px 5px"),
-      select(id:="channel", `class`:="form-control")(
-        option(value:="0", "WebSocket"), option(value:="1", "Server-Sent Events")),
+//      span(style:="margin:0px 5px"),
+//      select(id:="channel", `class`:="form-control")(
+//        option(value:="0", "WebSocket"), option(value:="1", "Server-Sent Events")),
       span(style:="margin:0px 5px"),
       button(`class`:="btn btn-default", onclick:={ () =>
         val input = $("#username").value().toString.trim
@@ -107,15 +107,16 @@ object ChatJS {
 
     def connect(url: String, username: String): Option[ChatClient] = {
       try {
-        if ($("#channel").value().toString == "0") {
-          if (g.window.WebSocket.toString != "undefined") {
-            Some(new WSChatClient(url, username))
-          } else None
-        } else {
-          if (g.window.EventSource.toString != "undefined") {
-            Some(new SSEChatClient(username))
-          } else None
-        }
+        Some(new WSChatClient(url, username))
+//        if ($("#channel").value().toString == "0") {
+//          if (g.window.WebSocket.toString != "undefined") {
+//            Some(new WSChatClient(url, username))
+//          } else None
+//        } else {
+//          if (g.window.EventSource.toString != "undefined") {
+//            Some(new SSEChatClient(username))
+//          } else None
+//        }
       }catch{
         case e: Throwable => {
           dom.window.alert("Unable to connect because "+e.toString)
@@ -158,20 +159,20 @@ object ChatJS {
 
   }
 
-  class SSEChatClient(val username: String) extends ChatClient {
-    import common.ExtAjax._
-    val sse = new EventSource(Routes.Chat.connectSSE(username))
-    sse.onmessage = ChatClient.receive _
-
-    def encode(value: String) = js.URIUtils.encodeURIComponent(value)
-
-    override def send(msg: String): Unit = {
-      Ajax.postAsForm(Routes.Chat.talk, s"username=${encode(username)}&msg=${encode(msg)}")
-    }
-
-    override def close() = sse.close()
-
-  }
+//  class SSEChatClient(val username: String) extends ChatClient {
+//    import common.ExtAjax._
+//    val sse = new EventSource(Routes.Chat.connectSSE(username))
+//    sse.onmessage = ChatClient.receive _
+//
+//    def encode(value: String) = js.URIUtils.encodeURIComponent(value)
+//
+//    override def send(msg: String): Unit = {
+//      Ajax.postAsForm(Routes.Chat.talk, s"username=${encode(username)}&msg=${encode(msg)}")
+//    }
+//
+//    override def close() = sse.close()
+//
+//  }
 
   def ready = {
     $("#message").keypress((e: dom.KeyboardEvent) => {
