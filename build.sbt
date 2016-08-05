@@ -6,6 +6,26 @@ lazy val scalaV = "2.11.8"
 
 //resolvers += "bintray/non" at "http://dl.bintray.com/non/maven"
 
+lazy val exampleMultitier = (crossProject.crossType(CrossType.Pure) in file("example-multitier")).
+  settings(
+    scalaVersion := scalaV,
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    libraryDependencies ++= Seq(
+      "de.tuda.stg" %%% "retier-core" % "0+",
+      "de.tuda.stg" %%% "retier-architectures-basic" % "0+",
+      "de.tuda.stg" %%% "retier-serializable-upickle" % "0+",
+      "de.tuda.stg" %%% "retier-network-ws-akka-play" % "0+",
+      "de.tuda.stg" %%% "retier-transmitter-rescala" % "0+",
+      "be.doeraene" %%%! "scalajs-jquery" % "0.9.0",
+      "com.lihaoyi" %%%! "scalatags" % "0.6.0",
+      "org.scala-js" %%%! "scalajs-dom" % "0.9.0",
+      "com.typesafe.play" %% "play" % "2.5.4"
+    )
+  )
+
+lazy val exampleMultitierJvm = exampleMultitier.jvm
+lazy val exampleMultitierJs = exampleMultitier.js
+
 lazy val exampleServer = (project in file("example-server")).settings(
   scalaVersion := scalaV,
   routesImport += "config.Routes._",
@@ -32,7 +52,7 @@ lazy val exampleServer = (project in file("example-server")).settings(
   )
  ).enablePlugins(PlayScala).
   aggregate(clients.map(projectToRef): _*).
-  dependsOn(exampleSharedJvm)
+  dependsOn(exampleSharedJvm, exampleMultitierJvm)
 
 lazy val exampleClient = (project in file("example-client")).settings(
   scalaVersion := scalaV,
@@ -47,7 +67,7 @@ lazy val exampleClient = (project in file("example-client")).settings(
     "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
-  dependsOn(exampleSharedJs)
+  dependsOn(exampleSharedJs, exampleMultitierJs)
 
 val exampleSharedJvmSettings = List(
   libraryDependencies ++= Seq(
