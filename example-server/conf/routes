@@ -12,12 +12,8 @@ POST          /todos/:id                   controllers.TodoController.update(id:
 DELETE        /todos/:id                   controllers.TodoController.delete(id: Long)
 POST          /todos/clear                 controllers.TodoController.clear
 
-
 GET           /hangman                     controllers.HangmanController.index
-POST          /hangman/start/:level        controllers.HangmanController.start(level: Int)
-GET           /hangman/session             controllers.HangmanController.session
-POST          /hangman/guess/:g            controllers.HangmanController.guess(g: Char)
-POST          /hangman/giveup              controllers.HangmanController.giveup
+GET           /hangman/ws                  controllers.HangmanController.ws
 
 GET           /upload                      controllers.FileUploadController.index
 POST          /upload                      controllers.FileUploadController.uploadFile

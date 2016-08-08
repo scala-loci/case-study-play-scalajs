@@ -1,9 +1,6 @@
-@(hangman: Option[shared.Hangman])(implicit request: RequestHeader)
-@*
-TODO: Find the way to pass object to javascript
-*@
+@()(implicit request: RequestHeader)
 @templates.main("Hangman"){
     <script>
-        example.HangmanJS().main ()
+        example.HangmanJS().main("@routes.HangmanController.ws.webSocketURL()")
     </script>
 }

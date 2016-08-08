@@ -16,6 +16,7 @@ lazy val exampleMultitier = (crossProject.crossType(CrossType.Pure) in file("exa
       "de.tuda.stg" %%% "retier-serializable-upickle" % "0+",
       "de.tuda.stg" %%% "retier-network-ws-akka-play" % "0+",
       "de.tuda.stg" %%% "retier-transmitter-rescala" % "0+",
+      "com.lihaoyi" %%% "scalarx" % "0.2.8",
       "be.doeraene" %%%! "scalajs-jquery" % "0.9.0",
       "com.lihaoyi" %%%! "scalatags" % "0.6.0",
       "org.scala-js" %%%! "scalajs-dom" % "0.9.0",
