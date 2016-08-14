@@ -1,7 +1,6 @@
 package models
 
 import scala.concurrent.Future
-import shared.Task
 import play.api.Play.current
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -20,19 +19,6 @@ object TaskModel {
   //some helper methods
 }
 
-
-trait TaskStore {
-
-  def all: Future[Seq[Task]]
-
-  def create(taskWithoutId: Task): Future[Task]
-
-  def update(task: Task): Future[Boolean]
-
-  def delete(ids: Long*): Future[Boolean]
-
-  def clearCompletedTasks: Future[Int]
-}
 
 object TaskMemStore extends TaskStore {
 

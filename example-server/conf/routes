@@ -6,11 +6,7 @@
 GET           /                            controllers.Application.index
 
 GET           /todos                       controllers.TodoController.index
-GET           /todos/all                   controllers.TodoController.all
-POST          /todos                       controllers.TodoController.create
-POST          /todos/:id                   controllers.TodoController.update(id: Long)
-DELETE        /todos/:id                   controllers.TodoController.delete(id: Long)
-POST          /todos/clear                 controllers.TodoController.clear
+GET           /todos/ws                    controllers.TodoController.ws
 
 GET           /hangman                     controllers.HangmanController.index
 GET           /hangman/ws                  controllers.HangmanController.ws
