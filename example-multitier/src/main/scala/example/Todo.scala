@@ -5,9 +5,7 @@ import retier.architectures.MultiClientServer._
 import retier.rescalaTransmitter._
 import retier.serializable.upickle._
 import retier.ws.akka._
-import rescala.Var
-import rescala.Signal
-import makro.SignalMacro.{SignalM => Signal}
+import rescala._
 import org.scalajs.dom
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2.section
@@ -50,7 +48,7 @@ class Todo(store: => TaskStore) {
   }
 
   def updateTaskList() = placed[Server].local { implicit! =>
-    store.all foreach { tasks() = _ }
+    store.all foreach tasks.set
   }
 
   placed[Server] { implicit! => updateTaskList }
@@ -115,7 +113,7 @@ class Todo(store: => TaskStore) {
             },
             div(`class` := "view")(
               ondblclick := { () =>
-                editing() = Some(task)
+                editing set Some(task)
               },
               input(`class`:= "toggle", `type`:= "checkbox", cursor:= "pointer", onchange:= { () =>
                   remote call update(task.copy(done = !task.done))
@@ -131,7 +129,7 @@ class Todo(store: => TaskStore) {
             form(
               onsubmit := { () =>
                 remote call update(task.copy(txt = inputRef.value))
-                editing() = None
+                editing set None
                 false
               },
               inputRef
@@ -157,7 +155,7 @@ class Todo(store: => TaskStore) {
             },
             name,
             href:="#",
-            onclick := { () => filter() = name }
+            onclick := { () => filter set name }
           ))
         }
       ),

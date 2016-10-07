@@ -1,7 +1,7 @@
 package models
 
 import retier._
-import rescala.events.Event
+import rescala._
 
 
 case class User(name: String, avatar: String)

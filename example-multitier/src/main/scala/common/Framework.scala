@@ -1,10 +1,9 @@
 package common
 
 import rx._
+import rescala._
 import scala.util.Success
 import scala.util.Failure
-import rescala.Signal
-import makro.SignalMacro.{SignalM => Signal}
 import scalatags.JsDom.all._
 import org.scalajs.dom.Element
 
@@ -28,10 +27,10 @@ object Framework {
    * reference to kill it when the element leaves the DOM (e.g. gets deleted).
    */
   implicit def rescalaMod(signal: Signal[HtmlTag]): Frag = {
-    var lastTag = signal.get.render
-    signal.changed += { value =>
-      val newTag = value.render
-      lastTag.parentElement.replaceChild(newTag, lastTag)
+    val rendered = signal map { _.render } withDefault "".render
+    var lastTag = rendered.now
+    rendered.changed observe { newTag =>
+      lastTag.parentNode.replaceChild(newTag, lastTag)
       lastTag = newTag
     }
     bindNode(lastTag)

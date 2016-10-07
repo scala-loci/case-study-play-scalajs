@@ -1,7 +1,7 @@
 package models
 
 import retier._
-import rescala.events.ImperativeEvent
+import rescala._
 import akka.util.Timeout
 import play.api.Play.current
 import play.api.libs.concurrent._
@@ -49,11 +49,11 @@ object Robot {
   implicit val timeout = Timeout(1 second)
 
   def randomQuote = {
-    DefaultChatRoom.robotMessage(ChatMessage(Some(robot), jobsQuotes(DefaultChatRoom.rand.nextInt(jobsQuotes.length))))
+    DefaultChatRoom.robotMessage fire ChatMessage(Some(robot), jobsQuotes(DefaultChatRoom.rand.nextInt(jobsQuotes.length)))
   }
 
   // Make the robot join the room
-  DefaultChatRoom.robotMessage(ChatMessage(Some(robot), "has entered the room"))
+  DefaultChatRoom.robotMessage fire ChatMessage(Some(robot), "has entered the room")
 
   // Make the robot talk every 30 seconds
   Akka.system.scheduler.schedule(30 seconds, 30 seconds)(randomQuote)
@@ -72,7 +72,7 @@ object DefaultChatRoom extends ChatRoom {
     avatars(rand.nextInt(avatars.length))
   }
 
-  val robotMessage = new ImperativeEvent[ChatMessage]
+  val robotMessage = Evt[ChatMessage]
 
   def setupRobot() = Robot
 }

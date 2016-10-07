@@ -5,7 +5,7 @@ import retier.architectures.MultiClientServer._
 import retier.rescalaTransmitter._
 import retier.serializable.upickle._
 import retier.ws.akka._
-import rescala.events.ImperativeEvent
+import rescala._
 import scalatags.JsDom.all._
 import org.scalajs.dom
 import org.scalajs.jquery.{ jQuery => $ }
@@ -24,11 +24,11 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
 
   val maxMessages = 20
 
-  val userMessage: ImperativeEvent[String] on Client = new ImperativeEvent[String]
+  val userMessage: Evt[String] on Client = Evt[String]
 
-  val systemMessage: ImperativeEvent[ChatMessage] localOn Server = new ImperativeEvent[ChatMessage]
+  val systemMessage: Evt[ChatMessage] localOn Server = Evt[ChatMessage]
 
-  val errorMessage: ImperativeEvent[(Remote[Client], String)] localOn Server = new ImperativeEvent[(Remote[Client], String)]
+  val errorMessage: Evt[(Remote[Client], String)] localOn Server = Evt[(Remote[Client], String)]
 
   val message = placed[Server].issued { implicit! => remote: Remote[Client] =>
     room.robotMessage ||
@@ -63,12 +63,12 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
     $("#message").keypress((e: dom.KeyboardEvent) => {
       if(!e.shiftKey && e.keyCode == 13) {
         e.preventDefault()
-        userMessage($("#message").value().toString)
+        userMessage fire $("#message").value().toString
         $("#message").value("")
       }
     })
 
-    message.asLocal += {
+    message.asLocal observe {
       case ChatMessage(Some(User(name, avatar)), message) =>
         val messages = dom.document.getElementById("messages")
         messages.appendChild(createMessage(message, name, avatar).render)
@@ -93,7 +93,7 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
     }
 
   placed[Server] { implicit! =>
-    remote[Client].joined += { remote =>
+    remote[Client].joined observe { remote =>
       room.setupRobot
 
       val name = username(remote)
@@ -102,17 +102,17 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
       if (name.nonEmpty && user.isEmpty) {
         val user = User(name, room.randomAvatar)
         store.save(user, remote)
-        systemMessage(ChatMessage(Some(user), "has entered the room"))
+        systemMessage fire ChatMessage(Some(user), "has entered the room")
       }
       else {
-        errorMessage((remote, "This username is already used"))
+        errorMessage fire ((remote, "This username is already used"))
         remote.disconnect()
       }
     }
 
-    remote[Client].left += { remote =>
+    remote[Client].left observe { remote =>
       store.get(username(remote), remote).map { user =>
-        systemMessage(ChatMessage(Some(user), "has left the room"))
+        systemMessage fire ChatMessage(Some(user), "has left the room")
         store.remove(user.name)
       }
     }

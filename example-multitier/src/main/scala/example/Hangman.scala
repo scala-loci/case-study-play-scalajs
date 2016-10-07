@@ -5,9 +5,7 @@ import retier.architectures.ClientServer._
 import retier.rescalaTransmitter._
 import retier.serializable.upickle._
 import retier.ws.akka._
-import rescala.Var
-import rescala.Signal
-import makro.SignalMacro.{SignalM => Signal}
+import rescala._
 import org.scalajs.dom
 import scalatags.JsDom.all._
 import scala.util.Random
@@ -42,8 +40,6 @@ case class Hangman(
   }
 }
 
-object Hangman { implicit val pickler = upickle.default.macroRW[Hangman] }
-
 
 @multitier
 class HangmanGame {
@@ -59,8 +55,8 @@ class HangmanGame {
   val rand: Random localOn Server = new Random
 
   val session = placed[Server].local { implicit! =>
-    val request = remote[Client].connected.protocol.identification collectFirst {
-      case request: RequestHeader => request
+    val request = remote[Client].connected.protocol.identification collect {
+      case (request: RequestHeader, _) => request
     }
     request.map(_.session).getOrElse(Session())
   }
@@ -71,22 +67,22 @@ class HangmanGame {
 
   def start(level: Int): Unit on Server = placed { implicit! =>
     val word = words(rand.nextInt(words.length)).toUpperCase
-    game() = Some(Hangman(level, word))
+    game set Some(Hangman(level, word))
   }
 
   def guess(g: Char): Unit on Server = placed { implicit! =>
-    game.get foreach { hangman =>
+    game.now foreach { hangman =>
       val misses = if (hangman.word.contains(g)) hangman.misses else hangman.misses + 1
-      game() = Some(hangman.copy(guess = hangman.guess :+ g, misses = misses))
+      game set Some(hangman.copy(guess = hangman.guess :+ g, misses = misses))
     }
   }
 
   def giveup(): Unit on Server = placed { implicit! =>
-    game() = None
+    game set None
   }
 
   placed[Server] { implicit! =>
-    game.changed += { game =>
+    game observe { game =>
       val newSession = game.map { game =>
         session + (sessionName -> write(game))
       }.getOrElse { session - sessionName }
@@ -102,7 +98,7 @@ class HangmanGame {
 
   placed[Client] { implicit! =>
     val content = Signal {
-      game.asLocal().flatten.map { game =>
+      game.asLocal().map { game =>
         if(game.gameOver) pageResult(game) else pageGuess(game)
       }.getOrElse {
         pagePlay
