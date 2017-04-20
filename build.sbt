@@ -17,10 +17,10 @@ lazy val exampleMultitier = (crossProject.crossType(CrossType.Pure) in file("exa
       "de.tuda.stg" %%% "retier-network-ws-akka-play" % "0+",
       "de.tuda.stg" %%% "retier-transmitter-rescala" % "0+",
       "com.lihaoyi" %%% "scalarx" % "0.2.8",
-      "be.doeraene" %%%! "scalajs-jquery" % "0.9.0",
-      "com.lihaoyi" %%%! "scalatags" % "0.6.0",
-      "org.scala-js" %%%! "scalajs-dom" % "0.9.0",
-      "com.typesafe.play" %% "play" % "2.5.4"
+      "be.doeraene" %%%! "scalajs-jquery" % "0.9.1",
+      "com.lihaoyi" %%%! "scalatags" % "0.6.2",
+      "org.scala-js" %%%! "scalajs-dom" % "0.9.1",
+      "com.typesafe.play" %% "play" % "2.5.14"
     )
   )
 
@@ -32,6 +32,7 @@ lazy val exampleServer = (project in file("example-server")).settings(
   routesImport += "config.Routes._",
   routesGenerator := StaticRoutesGenerator,
   scalaJSProjects := clients,
+  pipelineStages in Assets := Seq(scalaJSPipeline),
   pipelineStages := Seq(scalaJSProd, gzip),
   resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
   libraryDependencies ++= Seq(
@@ -44,9 +45,9 @@ lazy val exampleServer = (project in file("example-server")).settings(
     "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
     "com.typesafe.slick" %% "slick" % "3.1.1",
     "com.typesafe.play" %% "play-slick" % "2.0.2",
-    "com.lihaoyi" %% "upickle" % "0.4.1",
+    "com.lihaoyi" %% "upickle" % "0.4.4",
     "org.webjars" %% "webjars-play" % "2.4.0",
-    "org.webjars" % "bootstrap" % "3.3.5",
+    "org.webjars" % "bootstrap" % "3.3.7",
     "org.webjars" % "jquery" % "2.1.4",
     "org.webjars" % "font-awesome" % "4.4.0",
     "com.lihaoyi" %% "utest" % "0.3.0" % "test"
@@ -60,19 +61,19 @@ lazy val exampleClient = (project in file("example-client")).settings(
   persistLauncher := true,
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.0",
-    "com.lihaoyi" %%% "scalatags" % "0.6.0",
+    "org.scala-js" %%% "scalajs-dom" % "0.9.1",
+    "com.lihaoyi" %%% "scalatags" % "0.6.2",
     "com.lihaoyi" %%% "scalarx" % "0.2.8",
-    "be.doeraene" %%% "scalajs-jquery" % "0.9.0",
-    "com.lihaoyi" %%% "upickle" % "0.4.1",
+    "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
+    "com.lihaoyi" %%% "upickle" % "0.4.4",
     "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
   )
-).enablePlugins(ScalaJSPlugin, ScalaJSPlay).
+).enablePlugins(ScalaJSPlugin, ScalaJSWeb).
   dependsOn(exampleSharedJs, exampleMultitierJs)
 
 val exampleSharedJvmSettings = List(
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "0.4.1",
+    "com.lihaoyi" %% "upickle" % "0.4.4",
     "com.lihaoyi" %% "utest" % "0.3.0" % "test"
   )
 )
@@ -90,7 +91,7 @@ val exampleShared = (crossProject.crossType(CrossType.Pure) in file("example-sha
   jvmSettings(exampleSharedJvmSettings: _*).
   jsSettings(
     libraryDependencies ++= Seq(
-      "com.lihaoyi" %%% "upickle" % "0.4.1",
+      "com.lihaoyi" %%% "upickle" % "0.4.4",
       "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
     )
   )

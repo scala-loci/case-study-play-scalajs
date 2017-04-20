@@ -1,5 +1,5 @@
 # Play Framework with Scala.js Showcase
-###Scala: 2.11.8, Scala.js: 0.6.11, Play: 2.5.4, Slick: 3.1.1
+###Scala: 2.11.8, Scala.js: 0.6.15, Play: 2.5.14, Slick: 3.1.1
 
 #### Update: July 2016 
 This project was started on Oct 2014 when Scala.js was still an experimental project. I didn't expect Scala.js to come this far because there were a lot of Scala projects that were discontinued. Surprisingly, it's not just still alive but keeps growing. 
