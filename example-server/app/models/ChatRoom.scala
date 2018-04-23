@@ -1,6 +1,6 @@
 package models
 
-import retier._
+import loci._
 import rescala._
 import akka.util.Timeout
 import play.api.Play.current

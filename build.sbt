@@ -10,12 +10,12 @@ lazy val exampleMultitier = (crossProject.crossType(CrossType.Pure) in file("exa
   settings(
     scalaVersion := scalaV,
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    resolvers += Resolver.bintrayRepo("stg-tud", "maven"),
     libraryDependencies ++= Seq(
-      "de.tuda.stg" %%% "retier-core" % "0+",
-      "de.tuda.stg" %%% "retier-architectures-basic" % "0+",
-      "de.tuda.stg" %%% "retier-serializable-upickle" % "0+",
-      "de.tuda.stg" %%% "retier-network-ws-akka-play" % "0+",
-      "de.tuda.stg" %%% "retier-transmitter-rescala" % "0+",
+      "de.tuda.stg" %%% "scala-loci-core" % "0.1.0",
+      "de.tuda.stg" %%% "scala-loci-serializable-upickle" % "0.1.0",
+      "de.tuda.stg" %%% "scala-loci-network-ws-akka-play" % "0.1.0",
+      "de.tuda.stg" %%% "scala-loci-transmitter-rescala" % "0.1.0",
       "com.lihaoyi" %%% "scalarx" % "0.2.8",
       "be.doeraene" %%%! "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%%! "scalatags" % "0.6.2",

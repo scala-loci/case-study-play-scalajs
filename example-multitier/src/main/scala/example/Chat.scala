@@ -1,10 +1,9 @@
 package example
 
-import retier._
-import retier.architectures.MultiClientServer._
-import retier.rescalaTransmitter._
-import retier.serializable.upickle._
-import retier.ws.akka._
+import loci._
+import loci.rescalaTransmitter._
+import loci.serializable.upickle._
+import loci.ws.akka._
 import rescala._
 import scalatags.JsDom.all._
 import org.scalajs.dom
@@ -19,8 +18,8 @@ import models.ChatUserStore
 
 @multitier
 class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
-  trait Server extends ServerPeer[Client]
-  trait Client extends ClientPeer[Server]
+  trait Server extends Peer { type Tie <: Multiple[Client] }
+  trait Client extends Peer { type Tie <: Single[Server] }
 
   val maxMessages = 20
 
@@ -30,14 +29,14 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
 
   val errorMessage: Evt[(Remote[Client], String)] localOn Server = Evt[(Remote[Client], String)]
 
-  val message = placed[Server].issued { implicit! => remote: Remote[Client] =>
+  val message = placed[Server].sbj { implicit! => remote: Remote[Client] =>
     room.robotMessage ||
     systemMessage ||
     errorMessage
       .collect { case (client, message) if client == remote =>
         ChatMessage(None, message)
       } ||
-    userMessage.asLocalSeq
+    userMessage.asLocalFromAllSeq
       .map { case (client, message) =>
         store.get(username(client)).map { user =>
           ChatMessage(Some(user), HtmlEscapers.htmlEscaper.escape(message).replace("\n", "<br/>"))
@@ -125,12 +124,12 @@ object Chat {
   def server(store: ChatUserStore, room: ChatRoom) = servers getOrElseUpdate (store, {
     val webSocket = WebSocketHandler()
     val chat = new Chat(???, store, room)
-    multitier setup new chat.Server { def connect = webSocket }
+    multitier setup new chat.Server { def connect = listen[chat.Client] { webSocket } }
     webSocket
   })
 
   def client(url: String, assetsDir: String) = {
     val chat = new Chat(assetsDir, ???, ???)
-    multitier setup new chat.Client { def connect = WS(url) }
+    multitier setup new chat.Client { def connect = request[chat.Server] { WS(url) } }
   }
 }

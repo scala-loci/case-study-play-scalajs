@@ -1,10 +1,9 @@
 package example
 
-import retier._
-import retier.architectures.MultiClientServer._
-import retier.rescalaTransmitter._
-import retier.serializable.upickle._
-import retier.ws.akka._
+import loci._
+import loci.rescalaTransmitter._
+import loci.serializable.upickle._
+import loci.ws.akka._
 import rescala._
 import org.scalajs.dom
 import scalatags.JsDom.all._
@@ -17,8 +16,8 @@ import models.TaskStore
 
 @multitier
 class Todo(store: => TaskStore) {
-  trait Server extends ServerPeer[Client]
-  trait Client extends ClientPeer[Server]
+  trait Server extends Peer { type Tie <: Multiple[Client] }
+  trait Client extends Peer { type Tie <: Single[Server] }
 
   val tasks: Var[Seq[Task]] on Server = Var(Seq.empty[Task])
 
@@ -184,12 +183,12 @@ object Todo {
   def server(store: TaskStore) = servers getOrElseUpdate (store, {
     val webSocket = WebSocketHandler()
     val todo = new Todo(store)
-    multitier setup new todo.Server { def connect = webSocket }
+    multitier setup new todo.Server { def connect = listen[todo.Client] { webSocket } }
     webSocket
   })
 
   def client(url: String) = {
     val todo = new Todo(???)
-    multitier setup new todo.Client { def connect = WS(url) }
+    multitier setup new todo.Client { def connect = request[todo.Server] { WS(url) } }
   }
 }

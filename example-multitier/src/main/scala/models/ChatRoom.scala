@@ -1,6 +1,6 @@
 package models
 
-import retier._
+import loci._
 import rescala._
 
 

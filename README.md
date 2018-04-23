@@ -1,3 +1,5 @@
+*[ScalaLoci](http://scala-loci.github.io) reimplementation (see [example-multitier](example-multitier) directory)*
+
 # Play Framework with Scala.js Showcase
 ###Scala: 2.11.8, Scala.js: 0.6.15, Play: 2.5.14, Slick: 3.1.1
 

@@ -1,10 +1,9 @@
 package example
 
-import retier._
-import retier.architectures.ClientServer._
-import retier.rescalaTransmitter._
-import retier.serializable.upickle._
-import retier.ws.akka._
+import loci._
+import loci.rescalaTransmitter._
+import loci.serializable.upickle._
+import loci.ws.akka._
 import rescala._
 import org.scalajs.dom
 import scalatags.JsDom.all._
@@ -43,8 +42,8 @@ case class Hangman(
 
 @multitier
 class HangmanGame {
-  trait Server extends ServerPeer[Client]
-  trait Client extends ClientPeer[Server]
+  trait Server extends Peer { type Tie <: Single[Client] }
+  trait Client extends Peer { type Tie <: Single[Server] }
 
   val sessionName: String on Server = "hangman"
 
@@ -177,12 +176,12 @@ object HangmanGame {
   lazy val server = {
     val webSocket = WebSocketHandler()
     val hangman = new HangmanGame
-    multitier setup new hangman.Server { def connect = webSocket }
+    multitier setup new hangman.Server { def connect = listen[hangman.Client] { webSocket } }
     webSocket
   }
 
   def client(url: String) = {
     val hangman = new HangmanGame
-    multitier setup new hangman.Client { def connect = WS(url) }
+    multitier setup new hangman.Client { def connect = request[hangman.Server] { WS(url) } }
   }
 }

@@ -13,7 +13,7 @@ object ChatJS {
   var assetsDir: String = ""
   var wsBaseUrl: String = ""
 
-  var client: Option[retier.Runtime] = None
+  var client: Option[loci.Runtime] = None
 
   def signInPanel = div(id:="signInPanel"){
     form(`class`:="form-inline", role:="form")(
