@@ -4,6 +4,8 @@ import scala.concurrent.Future
 
 case class Task(id: Option[Long] = None, txt: String, done: Boolean)
 
+object Task { implicit val pickler = upickle.default.macroRW[Task] }
+
 trait TaskStore {
   def all: Future[Seq[Task]]
 

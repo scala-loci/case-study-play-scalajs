@@ -1,9 +1,10 @@
 package example
 
 import loci._
-import loci.rescalaTransmitter._
-import loci.serializable.upickle._
-import loci.ws.akka._
+import loci.transmitter.rescala._
+import loci.serializer.upickle._
+import loci.communicator.ws.akka._
+import loci.communicator.RequestInfo
 import rescala._
 import org.scalajs.dom
 import scalatags.JsDom.all._
@@ -39,6 +40,8 @@ case class Hangman(
   }
 }
 
+object Hangman { implicit val pickler = upickle.default.macroRW[Hangman] }
+
 
 @multitier
 class HangmanGame {
@@ -54,10 +57,12 @@ class HangmanGame {
   val rand: Random localOn Server = new Random
 
   val session = placed[Server].local { implicit! =>
-    val request = remote[Client].connected.protocol.identification collect {
-      case (request: RequestHeader, _) => request
+    remote[Client].connected.protocol match {
+      case RequestInfo(request: RequestHeader) =>
+        request.session
+      case _ =>
+        Session()
     }
-    request.map(_.session).getOrElse(Session())
   }
 
   val game = placed[Server] { implicit! =>
@@ -182,6 +187,6 @@ object HangmanGame {
 
   def client(url: String) = {
     val hangman = new HangmanGame
-    multitier setup new hangman.Client { def connect = request[hangman.Server] { WS(url) } }
+    multitier setup new hangman.Client { def connect = connect[hangman.Server] { WS(url) } }
   }
 }

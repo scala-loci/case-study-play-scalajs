@@ -1,9 +1,9 @@
 package example
 
 import loci._
-import loci.rescalaTransmitter._
-import loci.serializable.upickle._
-import loci.ws.akka._
+import loci.transmitter.rescala._
+import loci.serializer.upickle._
+import loci.communicator.ws.akka._
 import rescala._
 import org.scalajs.dom
 import scalatags.JsDom.all._
@@ -189,6 +189,6 @@ object Todo {
 
   def client(url: String) = {
     val todo = new Todo(???)
-    multitier setup new todo.Client { def connect = request[todo.Server] { WS(url) } }
+    multitier setup new todo.Client { def connect = connect[todo.Server] { WS(url) } }
   }
 }

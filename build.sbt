@@ -2,25 +2,27 @@ import sbt.Project.projectToRef
 import play.sbt.PlayImport.PlayKeys._
 
 lazy val clients = Seq(exampleClient)
-lazy val scalaV = "2.11.8"
+lazy val scalaV = "2.11.12"
 
 //resolvers += "bintray/non" at "http://dl.bintray.com/non/maven"
 
 lazy val exampleMultitier = (crossProject.crossType(CrossType.Pure) in file("example-multitier")).
   settings(
     scalaVersion := scalaV,
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
     resolvers += Resolver.bintrayRepo("stg-tud", "maven"),
     libraryDependencies ++= Seq(
-      "de.tuda.stg" %%% "scala-loci-core" % "0.1.0",
-      "de.tuda.stg" %%% "scala-loci-serializable-upickle" % "0.1.0",
-      "de.tuda.stg" %%% "scala-loci-network-ws-akka-play" % "0.1.0",
-      "de.tuda.stg" %%% "scala-loci-transmitter-rescala" % "0.1.0",
+      "de.tuda.stg" %%% "scala-loci-lang" % "0.2.0",
+      "de.tuda.stg" %%% "scala-loci-serializer-upickle" % "0.2.0",
+      "de.tuda.stg" %%% "scala-loci-communicator-ws-akka-play" % "0.2.0",
+      "de.tuda.stg" %%% "scala-loci-lang-transmitter-rescala" % "0.2.0",
       "com.lihaoyi" %%% "scalarx" % "0.2.8",
       "be.doeraene" %%%! "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%%! "scalatags" % "0.6.2",
       "org.scala-js" %%%! "scalajs-dom" % "0.9.1",
-      "com.typesafe.play" %% "play" % "2.5.14"
+      "com.typesafe.play" %% "play" % "2.5.14",
+      "com.typesafe.akka" %% "akka-http" % "10.1.1",
+      "com.typesafe.akka" %% "akka-stream" % "2.4.20"
     )
   )
 
@@ -45,12 +47,14 @@ lazy val exampleServer = (project in file("example-server")).settings(
     "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
     "com.typesafe.slick" %% "slick" % "3.1.1",
     "com.typesafe.play" %% "play-slick" % "2.0.2",
-    "com.lihaoyi" %% "upickle" % "0.4.4",
+    "com.lihaoyi" %% "upickle" % "0.6.5",
     "org.webjars" %% "webjars-play" % "2.4.0",
     "org.webjars" % "bootstrap" % "3.3.7",
-    "org.webjars" % "jquery" % "2.1.4",
+    "org.webjars" % "jquery" % "1.11.3",
     "org.webjars" % "font-awesome" % "4.4.0",
-    "com.lihaoyi" %% "utest" % "0.3.0" % "test"
+    "com.lihaoyi" %% "utest" % "0.3.0" % "test",
+    "com.typesafe.akka" %% "akka-http" % "10.1.1",
+    "com.typesafe.akka" %% "akka-stream" % "2.4.20"
   )
  ).enablePlugins(PlayScala).
   aggregate(clients.map(projectToRef): _*).
@@ -65,7 +69,7 @@ lazy val exampleClient = (project in file("example-client")).settings(
     "com.lihaoyi" %%% "scalatags" % "0.6.2",
     "com.lihaoyi" %%% "scalarx" % "0.2.8",
     "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
-    "com.lihaoyi" %%% "upickle" % "0.4.4",
+    "com.lihaoyi" %%% "upickle" % "0.6.5",
     "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb).

@@ -84,7 +84,7 @@ object TaskSlickStore extends TaskStore {
     def id   = column[Option[Long]]("ID", O.PrimaryKey, O.AutoInc)
     def txt  = column[String]("TXT")
     def done = column[Boolean]("DONE")
-    def * = (id, txt, done) <> (Task.tupled, Task.unapply)
+    def * = (id, txt, done) <> ((Task.apply _).tupled, Task.unapply)
   }
 
 

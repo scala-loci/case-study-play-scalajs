@@ -1,9 +1,9 @@
 package example
 
 import loci._
-import loci.rescalaTransmitter._
-import loci.serializable.upickle._
-import loci.ws.akka._
+import loci.transmitter.rescala._
+import loci.serializer.upickle._
+import loci.communicator.ws.akka._
 import rescala._
 import scalatags.JsDom.all._
 import org.scalajs.dom
@@ -130,6 +130,6 @@ object Chat {
 
   def client(url: String, assetsDir: String) = {
     val chat = new Chat(assetsDir, ???, ???)
-    multitier setup new chat.Client { def connect = request[chat.Server] { WS(url) } }
+    multitier setup new chat.Client { def connect = connect[chat.Server] { WS(url) } }
   }
 }
