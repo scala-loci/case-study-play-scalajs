@@ -5,7 +5,7 @@ import loci.transmitter.rescala._
 import loci.serializer.upickle._
 import loci.communicator.ws.akka._
 import loci.communicator.RequestInfo
-import rescala._
+import rescala.default._
 import org.scalajs.dom
 import scalatags.JsDom.all._
 import scala.util.Random
@@ -40,23 +40,25 @@ case class Hangman(
   }
 }
 
-object Hangman { implicit val pickler = upickle.default.macroRW[Hangman] }
+object Hangman {
+  implicit val transmittable = loci.transmitter.IdenticallyTransmittable[Hangman]
+  implicit val pickler = upickle.default.macroRW[Hangman]
+}
 
 
-@multitier
-class HangmanGame {
-  trait Server extends Peer { type Tie <: Single[Client] }
-  trait Client extends Peer { type Tie <: Single[Server] }
+@multitier object HangmanGame {
+  @peer type Server <: { type Tie <: Single[Client] }
+  @peer type Client <: { type Tie <: Single[Server] }
 
   val sessionName: String on Server = "hangman"
 
-  val words: Array[String] localOn Server =
+  val words: Local[Array[String]] on Server =
     Source.fromInputStream(getClass.getResourceAsStream("/public/text/words.txt"))
       .mkString.split("[\\s,]+").filter(word => (word.length > 5 && word.forall(Character.isLetter)))
 
-  val rand: Random localOn Server = new Random
+  val rand: Local[Random] on Server = new Random
 
-  val session = placed[Server].local { implicit! =>
+  val session = on[Server] local { implicit! =>
     remote[Client].connected.protocol match {
       case RequestInfo(request: RequestHeader) =>
         request.session
@@ -65,7 +67,7 @@ class HangmanGame {
     }
   }
 
-  val game = placed[Server] { implicit! =>
+  val game = on[Server] { implicit! =>
     Var(session.get(sessionName).map(read[Hangman](_)))
   }
 
@@ -85,7 +87,7 @@ class HangmanGame {
     game set None
   }
 
-  placed[Server] { implicit! =>
+  on[Server] { implicit! =>
     game observe { game =>
       val newSession = game.map { game =>
         session + (sessionName -> write(game))
@@ -94,13 +96,13 @@ class HangmanGame {
       val cookie = Session.encodeAsCookie(newSession)
       val cookieString = cookie.name + '=' + cookie.value
 
-      remote[Client].capture(cookieString) { implicit! =>
+      on[Client].run.capture(cookieString) { implicit! =>
         dom.document.cookie = cookieString
       }
     }
   }
 
-  placed[Client] { implicit! =>
+  on[Client] { implicit! =>
     val content = Signal {
       game.asLocal().map { game =>
         if(game.gameOver) pageResult(game) else pageGuess(game)
@@ -111,7 +113,7 @@ class HangmanGame {
     dom.document.getElementById("content").appendChild(content.render)
   }
 
-  def pagePlay = placed[Client].local { implicit! =>
+  def pagePlay = on[Client] local { implicit! =>
     div {
       var currentLevel = 0
       val levels = Array(
@@ -145,7 +147,7 @@ class HangmanGame {
     }
   }
 
-  def pageGuess(game: Hangman) = placed[Client].local { implicit! =>
+  def pageGuess(game: Hangman) = on[Client] local { implicit! =>
     div(
       h2("Please make a guess"),
       h3(style := "letter-spacing: 4px;")(game.guessWord.mkString),
@@ -163,7 +165,7 @@ class HangmanGame {
     )
   }
 
-  def pageResult(game: Hangman) = placed[Client].local { implicit! =>
+  def pageResult(game: Hangman) = on[Client] local { implicit! =>
     div {
       val result = if (game.won) "You Win!" else "You Lose!"
       div(
@@ -177,16 +179,14 @@ class HangmanGame {
   }
 }
 
-object HangmanGame {
+object HangmanGameInitialization {
   lazy val server = {
     val webSocket = WebSocketHandler()
-    val hangman = new HangmanGame
-    multitier setup new hangman.Server { def connect = listen[hangman.Client] { webSocket } }
+    multitier start new Instance[HangmanGame.Server](listen[HangmanGame.Client] { webSocket })
     webSocket
   }
 
   def client(url: String) = {
-    val hangman = new HangmanGame
-    multitier setup new hangman.Client { def connect = connect[hangman.Server] { WS(url) } }
+    multitier start new Instance[HangmanGame.Client](connect[HangmanGame.Server] { WS(url) })
   }
 }

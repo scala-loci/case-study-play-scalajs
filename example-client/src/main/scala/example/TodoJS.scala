@@ -5,7 +5,7 @@ import scala.scalajs.js.annotation.JSExport
 @JSExport
 object TodoJS {
   @JSExport
-  def main(url: String): Unit = Todo.client(url)
+  def main(url: String): Unit = TodoInitialization.client(url)
 }
 
 

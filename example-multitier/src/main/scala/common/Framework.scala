@@ -1,7 +1,7 @@
 package common
 
 import rx._
-import rescala._
+import rescala.default._
 import scala.util.Success
 import scala.util.Failure
 import scalatags.JsDom.all._

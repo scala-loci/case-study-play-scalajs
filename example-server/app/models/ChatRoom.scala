@@ -1,7 +1,7 @@
 package models
 
 import loci._
-import rescala._
+import rescala.default._
 import akka.util.Timeout
 import play.api.Play.current
 import play.api.libs.concurrent._
@@ -15,13 +15,13 @@ import scala.util.Random
 import scala.language.postfixOps
 
 object ChatUserMemStore extends ChatUserStore {
-  val users = Map.empty[String, (String, Remote[Peer])]
+  val users = Map.empty[String, (String, Remote[_])]
 
   override def get(name: String): Option[User] = {
     users.get(name).map { case (avatar, _) => User(name, avatar) }
   }
 
-  override def get(name: String, remote: Remote[Peer]): Option[User] = {
+  override def get(name: String, remote: Remote[_]): Option[User] = {
     users.get(name).flatMap {
       case (avatar, userRemote) if userRemote == remote => Some(User(name, avatar))
       case _ => None
@@ -32,7 +32,7 @@ object ChatUserMemStore extends ChatUserStore {
     users.toList.map { case (name, (avatar, _)) => User(name, avatar) }
   }
 
-  override def save(user: User, remote: Remote[Peer]): Boolean = {
+  override def save(user: User, remote: Remote[_]): Boolean = {
     users.put(user.name, (user.avatar, remote)).map(_ => true).getOrElse(false)
   }
 

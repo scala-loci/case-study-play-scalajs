@@ -1,26 +1,32 @@
 package models
 
 import loci._
-import rescala._
+import rescala.default._
 
 
 case class User(name: String, avatar: String)
 
 case class ChatMessage(user: Option[User], message: String)
 
-object User { implicit val pickler = upickle.default.macroRW[User] }
+object User {
+  implicit val transmittable = loci.transmitter.IdenticallyTransmittable[User]
+  implicit val pickler = upickle.default.macroRW[User]
+}
 
-object ChatMessage { implicit val pickler = upickle.default.macroRW[ChatMessage] }
+object ChatMessage {
+  implicit val transmittable = loci.transmitter.IdenticallyTransmittable[ChatMessage]
+  implicit val pickler = upickle.default.macroRW[ChatMessage]
+}
 
 
 trait ChatUserStore {
   def get(name: String): Option[User]
 
-  def get(name: String, remote: Remote[Peer]): Option[User]
+  def get(name: String, remote: Remote[_]): Option[User]
 
   def list: List[User]
 
-  def save(user: User, remote: Remote[Peer]): Boolean
+  def save(user: User, remote: Remote[_]): Boolean
 
   def remove(name: String): Boolean
 }

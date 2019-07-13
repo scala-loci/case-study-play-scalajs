@@ -5,7 +5,7 @@ import scala.scalajs.js.annotation.JSExport
 @JSExport
 object HangmanJS {
   @JSExport
-  def main(url: String): Unit = HangmanGame.client(url)
+  def main(url: String): Unit = HangmanGameInitialization.client(url)
 }
 
 

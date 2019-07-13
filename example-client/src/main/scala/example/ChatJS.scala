@@ -13,7 +13,7 @@ object ChatJS {
   var assetsDir: String = ""
   var wsBaseUrl: String = ""
 
-  var client: Option[loci.Runtime] = None
+  var client: Option[loci.Runtime[Chat.Client]] = None
 
   def signInPanel = div(id:="signInPanel"){
     form(`class`:="form-inline", role:="form")(
@@ -75,7 +75,7 @@ object ChatJS {
   )
 
   def connect(username: String) =
-    Chat.client(wsBaseUrl + URIUtils.encodeURIComponent(username), assetsDir)
+    ChatInitialization.client(wsBaseUrl + URIUtils.encodeURIComponent(username), assetsDir)
 
   @JSExport
   def main(settings: js.Dynamic) = {

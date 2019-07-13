@@ -1,6 +1,6 @@
 package controllers
 
-import example.Chat
+import example.ChatInitialization
 import models.ChatUserMemStore
 import models.DefaultChatRoom
 import play.api.mvc.Action
@@ -11,7 +11,7 @@ object ChatController extends Controller {
     Ok(views.html.chat())
   }
 
-  def chatWS(username: String) = Chat.server(ChatUserMemStore, DefaultChatRoom)
+  def chatWS(username: String) = ChatInitialization.server(ChatUserMemStore, DefaultChatRoom)
 }
 
 

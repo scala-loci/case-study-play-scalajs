@@ -1,6 +1,6 @@
 package controllers
 
-import example.HangmanGame
+import example.HangmanGameInitialization
 import play.api.mvc.Action
 import play.api.mvc.Controller
 
@@ -9,7 +9,7 @@ object HangmanController extends Controller{
     Ok(views.html.hangman())
   }
 
-  def ws = HangmanGame.server
+  def ws = HangmanGameInitialization.server
 }
 
 

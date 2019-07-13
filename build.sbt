@@ -9,13 +9,13 @@ lazy val scalaV = "2.11.12"
 lazy val exampleMultitier = (crossProject.crossType(CrossType.Pure) in file("example-multitier")).
   settings(
     scalaVersion := scalaV,
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
     resolvers += Resolver.bintrayRepo("stg-tud", "maven"),
     libraryDependencies ++= Seq(
-      "de.tuda.stg" %%% "scala-loci-lang" % "0.2.0",
-      "de.tuda.stg" %%% "scala-loci-serializer-upickle" % "0.2.0",
-      "de.tuda.stg" %%% "scala-loci-communicator-ws-akka-play" % "0.2.0",
-      "de.tuda.stg" %%% "scala-loci-lang-transmitter-rescala" % "0.2.0",
+      "de.tuda.stg" %%% "scala-loci-lang" % "0.3.0",
+      "de.tuda.stg" %%% "scala-loci-serializer-upickle" % "0.3.0",
+      "de.tuda.stg" %%% "scala-loci-communicator-ws-akka-play" % "0.3.0",
+      "de.tuda.stg" %%% "scala-loci-lang-transmitter-rescala" % "0.3.0",
       "com.lihaoyi" %%% "scalarx" % "0.2.8",
       "be.doeraene" %%%! "scalajs-jquery" % "0.9.1",
       "com.lihaoyi" %%%! "scalatags" % "0.6.2",

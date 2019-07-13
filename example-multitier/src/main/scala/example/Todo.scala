@@ -4,7 +4,7 @@ import loci._
 import loci.transmitter.rescala._
 import loci.serializer.upickle._
 import loci.communicator.ws.akka._
-import rescala._
+import rescala.default._
 import org.scalajs.dom
 import scalatags.JsDom.all._
 import scalatags.JsDom.tags2.section
@@ -14,45 +14,46 @@ import common.Framework._
 import models.Task
 import models.TaskStore
 
-@multitier
-class Todo(store: => TaskStore) {
-  trait Server extends Peer { type Tie <: Multiple[Client] }
-  trait Client extends Peer { type Tie <: Single[Server] }
+@multitier object Todo {
+  @peer type Server <: { type Tie <: Multiple[Client] }
+  @peer type Client <: { type Tie <: Single[Server] }
+
+  val store: Local[TaskStore] on Server
 
   val tasks: Var[Seq[Task]] on Server = Var(Seq.empty[Task])
 
-  val filters = placed[Client].local { implicit! =>
+  val filters = on[Client] local { implicit! =>
     Map[String, Task => Boolean](
       ("All", t => true),
       ("Active", !_.done),
       ("Completed", _.done))
   }
 
-  val filter: Var[String] localOn Client = Var("All")
+  val filter: Local[Var[String]] on Client = Var("All")
 
-  def create(txt: String, done: Boolean = false) = placed[Server] { implicit! =>
+  def create(txt: String, done: Boolean = false) = on[Server] { implicit! =>
     store.create(Task(None, txt, done)) foreach { _ => updateTaskList }
   }
 
-  def update(task: Task) = placed[Server] { implicit! =>
+  def update(task: Task) = on[Server] { implicit! =>
     task.id foreach { _ => store.update(task) foreach { _ => updateTaskList } }
   }
 
-  def delete(id: Option[Long]) = placed[Server] { implicit! =>
+  def delete(id: Option[Long]) = on[Server] { implicit! =>
     id foreach { store.delete(_) foreach { _ => updateTaskList } }
   }
 
-  def clearCompletedTasks() = placed[Server] { implicit! =>
+  def clearCompletedTasks() = on[Server] { implicit! =>
     store.clearCompletedTasks foreach { _ => updateTaskList }
   }
 
-  def updateTaskList() = placed[Server].local { implicit! =>
+  def updateTaskList() = on[Server].local { implicit! =>
     store.all foreach tasks.set
   }
 
-  placed[Server] { implicit! => updateTaskList }
+  on[Server] { implicit! => updateTaskList }
 
-  def templateHeader = placed[Client].local { implicit! =>
+  def templateHeader = on[Client] local { implicit! =>
     val inputBox = input(
       id:="new-todo",
       placeholder:="What needs to be done?",
@@ -71,7 +72,7 @@ class Todo(store: => TaskStore) {
     )
   }
 
-  def templateBody = placed[Client].local { implicit! =>
+  def templateBody = on[Client] local { implicit! =>
     section(id:="main")(
       input(
         id:="toggle-all",
@@ -88,7 +89,7 @@ class Todo(store: => TaskStore) {
     )
   }
 
-  def templateFooter = placed[Client].local { implicit! =>
+  def templateFooter = on[Client] local { implicit! =>
     footer(id:="info")(
       p("Double-click to edit a todo"),
       p("Original version created by ", a(href:="https://github.com/lihaoyi/workbench-example-app/blob/todomvc/src/main/scala/example/ScalaJSExample.scala")("Li Haoyi")),
@@ -96,10 +97,10 @@ class Todo(store: => TaskStore) {
     )
   }
 
-  def partList = placed[Client].local { implicit! =>
+  def partList = on[Client] local { implicit! =>
     val editing = Var(Option.empty[Task])
 
-    Signal {
+    Signal.dynamic {
       ul(id := "todo-list")(
         for (task <- tasks.asLocal() if filters(filter())(task)) yield {
           val inputRef = input(`class` := "edit", value := task.txt).render
@@ -139,7 +140,7 @@ class Todo(store: => TaskStore) {
     }
   }
 
-  def partControls = placed[Client].local { implicit! =>
+  def partControls = on[Client] local { implicit! =>
     val done = Signal { tasks.asLocal().count(_.done) }
     val notDone = Signal { tasks.asLocal().length - done() }
 
@@ -148,7 +149,7 @@ class Todo(store: => TaskStore) {
       ul(id:="filters")(
         for ((name, pred) <- filters.toSeq) yield {
           li(a(
-            `class`:= Signal {
+            `class`:= Signal.dynamic {
               if (name == filter()) "selected"
               else ""
             },
@@ -166,7 +167,7 @@ class Todo(store: => TaskStore) {
     )
   }
 
-  placed[Client] { implicit! =>
+  on[Client] { implicit! =>
     dom.document.getElementById("content").appendChild(
       section(id:="todoapp")(
         templateHeader,
@@ -177,18 +178,18 @@ class Todo(store: => TaskStore) {
   }
 }
 
-object Todo {
+object TodoInitialization {
   private val servers = mutable.Map.empty[TaskStore, WebSocketHandler]
 
-  def server(store: TaskStore) = servers getOrElseUpdate (store, {
+  def server(taskStore: TaskStore) = servers getOrElseUpdate (taskStore, {
     val webSocket = WebSocketHandler()
-    val todo = new Todo(store)
-    multitier setup new todo.Server { def connect = listen[todo.Client] { webSocket } }
+    multitier start new Instance[Todo.Server](listen[Todo.Client] { webSocket }) {
+      val store = taskStore
+    }
     webSocket
   })
 
   def client(url: String) = {
-    val todo = new Todo(???)
-    multitier setup new todo.Client { def connect = connect[todo.Server] { WS(url) } }
+    multitier start new Instance[Todo.Client](connect[Todo.Server] { WS(url) })
   }
 }

@@ -1,6 +1,6 @@
 package controllers
 
-import example.Todo
+import example.TodoInitialization
 import models.TaskModel
 import play.api.mvc.Action
 import play.api.mvc.Controller
@@ -10,7 +10,7 @@ object TodoController extends Controller{
     Ok(views.html.todo("TODO"))
   }
 
-  def ws = Todo.server(TaskModel.store)
+  def ws = TodoInitialization.server(TaskModel.store)
 }
 
 //package controllers

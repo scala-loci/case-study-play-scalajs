@@ -4,7 +4,7 @@ import loci._
 import loci.transmitter.rescala._
 import loci.serializer.upickle._
 import loci.communicator.ws.akka._
-import rescala._
+import rescala.default._
 import scalatags.JsDom.all._
 import org.scalajs.dom
 import org.scalajs.jquery.{ jQuery => $ }
@@ -16,20 +16,23 @@ import models.ChatRoom
 import models.ChatMessage
 import models.ChatUserStore
 
-@multitier
-class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
-  trait Server extends Peer { type Tie <: Multiple[Client] }
-  trait Client extends Peer { type Tie <: Single[Server] }
+@multitier object Chat {
+  @peer type Server <: { type Tie <: Multiple[Client] }
+  @peer type Client <: { type Tie <: Single[Server] }
+
+  val assetsDir: Local[String] on Client
+  val store: Local[ChatUserStore] on Server
+  val room: Local[ChatRoom] on Server
 
   val maxMessages = 20
 
   val userMessage: Evt[String] on Client = Evt[String]
 
-  val systemMessage: Evt[ChatMessage] localOn Server = Evt[ChatMessage]
+  val systemMessage: Local[Evt[ChatMessage]] on Server = Evt[ChatMessage]
 
-  val errorMessage: Evt[(Remote[Client], String)] localOn Server = Evt[(Remote[Client], String)]
+  val errorMessage: Local[Evt[(Remote[Client], String)]] on Server = Evt[(Remote[Client], String)]
 
-  val message = placed[Server].sbj { implicit! => remote: Remote[Client] =>
+  val message = on[Server] sbj { implicit! => remote: Remote[Client] =>
     room.robotMessage ||
     systemMessage ||
     errorMessage
@@ -45,7 +48,7 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
       .collect { case Some(message) => message }
   }
 
-  def createMessage(message: String, name: String, avatar: String) = placed[Client].local { implicit! =>
+  def createMessage(message: String, name: String, avatar: String) = on[Client] local { implicit! =>
     val ownname = username(remote[Server].connected)
     div(`class`:=s"row message-box${ if(name == ownname) "-me" else "" }")(
       div(`class`:="col-md-2")(
@@ -58,7 +61,7 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
     )
   }
 
-  placed[Client] { implicit! =>
+  on[Client] { implicit! =>
     $("#message").keypress((e: dom.KeyboardEvent) => {
       if(!e.shiftKey && e.keyCode == 13) {
         e.preventDefault()
@@ -81,17 +84,13 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
     }
   }
 
-  placed[Client].terminating { implicit! =>
-    $("#message").off()
-  }
-
   def username(remote: Remote[_]) =
     remote.protocol match {
       case WS(url, _, _) => new URI(url).getPath.substring("/chat/ws/".size)
       case _ => ""
     }
 
-  placed[Server] { implicit! =>
+  on[Server] { implicit! =>
     remote[Client].joined observe { remote =>
       room.setupRobot
 
@@ -118,18 +117,21 @@ class Chat(assetsDir: => String, store: => ChatUserStore, room: => ChatRoom) {
   }
 }
 
-object Chat {
+object ChatInitialization {
   private val servers = mutable.Map.empty[ChatUserStore, WebSocketHandler]
 
-  def server(store: ChatUserStore, room: ChatRoom) = servers getOrElseUpdate (store, {
+  def server(chatUserStore: ChatUserStore, chatRoom: ChatRoom) = servers getOrElseUpdate (chatUserStore, {
     val webSocket = WebSocketHandler()
-    val chat = new Chat(???, store, room)
-    multitier setup new chat.Server { def connect = listen[chat.Client] { webSocket } }
+    multitier start new Instance[Chat.Server](listen[Chat.Client] { webSocket }) {
+      val store = chatUserStore
+      val room = chatRoom
+    }
     webSocket
   })
 
-  def client(url: String, assetsDir: String) = {
-    val chat = new Chat(assetsDir, ???, ???)
-    multitier setup new chat.Client { def connect = connect[chat.Server] { WS(url) } }
+  def client(url: String, assetsDirectory: String) = {
+    multitier start new Instance[Chat.Client](connect[Chat.Server] { WS(url) }) {
+      val assetsDir = assetsDirectory
+    }
   }
 }
