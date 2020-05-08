@@ -58,7 +58,7 @@ object Hangman {
 
   val rand: Local[Random] on Server = new Random
 
-  val session = on[Server] local { implicit! =>
+  val session = on[Server] local {
     remote[Client].connected.protocol match {
       case RequestInfo(request: RequestHeader) =>
         request.session
@@ -67,27 +67,25 @@ object Hangman {
     }
   }
 
-  val game = on[Server] { implicit! =>
+  val game = on[Server] {
     Var(session.get(sessionName).map(read[Hangman](_)))
   }
 
-  def start(level: Int): Unit on Server = placed { implicit! =>
+  def start(level: Int): Unit on Server = {
     val word = words(rand.nextInt(words.length)).toUpperCase
-    game set Some(Hangman(level, word))
+    game.set(Some(Hangman(level, word)))
   }
 
-  def guess(g: Char): Unit on Server = placed { implicit! =>
+  def guess(g: Char): Unit on Server =
     game.now foreach { hangman =>
       val misses = if (hangman.word.contains(g)) hangman.misses else hangman.misses + 1
-      game set Some(hangman.copy(guess = hangman.guess :+ g, misses = misses))
+      game.set(Some(hangman.copy(guess = hangman.guess :+ g, misses = misses)))
     }
-  }
 
-  def giveup(): Unit on Server = placed { implicit! =>
-    game set None
-  }
+  def giveup(): Unit on Server =
+    game.set(None)
 
-  on[Server] { implicit! =>
+  on[Server] {
     game observe { game =>
       val newSession = game.map { game =>
         session + (sessionName -> write(game))
@@ -96,13 +94,13 @@ object Hangman {
       val cookie = Session.encodeAsCookie(newSession)
       val cookieString = cookie.name + '=' + cookie.value
 
-      on[Client].run.capture(cookieString) { implicit! =>
+      on[Client].run.capture(cookieString) {
         dom.document.cookie = cookieString
       }
     }
   }
 
-  on[Client] { implicit! =>
+  on[Client] {
     val content = Signal {
       game.asLocal().map { game =>
         if(game.gameOver) pageResult(game) else pageGuess(game)
@@ -113,7 +111,7 @@ object Hangman {
     dom.document.getElementById("content").appendChild(content.render)
   }
 
-  def pagePlay = on[Client] local { implicit! =>
+  def pagePlay = on[Client] local {
     div {
       var currentLevel = 0
       val levels = Array(
@@ -147,7 +145,7 @@ object Hangman {
     }
   }
 
-  def pageGuess(game: Hangman) = on[Client] local { implicit! =>
+  def pageGuess(game: Hangman) = on[Client] local {
     div(
       h2("Please make a guess"),
       h3(style := "letter-spacing: 4px;")(game.guessWord.mkString),
@@ -165,7 +163,7 @@ object Hangman {
     )
   }
 
-  def pageResult(game: Hangman) = on[Client] local { implicit! =>
+  def pageResult(game: Hangman) = on[Client] local {
     div {
       val result = if (game.won) "You Win!" else "You Lose!"
       div(

@@ -12,14 +12,14 @@ lazy val exampleMultitier = (crossProject.crossType(CrossType.Pure) in file("exa
     addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch),
     resolvers += Resolver.bintrayRepo("stg-tud", "maven"),
     libraryDependencies ++= Seq(
-      "de.tuda.stg" %%% "scala-loci-lang" % "0.3.0",
-      "de.tuda.stg" %%% "scala-loci-serializer-upickle" % "0.3.0",
-      "de.tuda.stg" %%% "scala-loci-communicator-ws-akka-play" % "0.3.0",
-      "de.tuda.stg" %%% "scala-loci-lang-transmitter-rescala" % "0.3.0",
+      "de.tuda.stg" %%% "scala-loci-lang" % "0.4.0",
+      "de.tuda.stg" %%% "scala-loci-serializer-upickle" % "0.4.0",
+      "de.tuda.stg" %%% "scala-loci-communicator-ws-akka-play" % "0.4.0",
+      "de.tuda.stg" %%% "scala-loci-lang-transmitter-rescala" % "0.4.0",
       "com.lihaoyi" %%% "scalarx" % "0.2.8",
       "be.doeraene" %%%! "scalajs-jquery" % "0.9.1",
-      "com.lihaoyi" %%%! "scalatags" % "0.6.2",
-      "org.scala-js" %%%! "scalajs-dom" % "0.9.1",
+      "com.lihaoyi" %%%! "scalatags" % "0.6.8",
+      "org.scala-js" %%%! "scalajs-dom" % "1.0.0",
       "com.typesafe.play" %% "play" % "2.5.14",
       "com.typesafe.akka" %% "akka-http" % "10.1.1",
       "com.typesafe.akka" %% "akka-stream" % "2.4.20"
@@ -47,7 +47,7 @@ lazy val exampleServer = (project in file("example-server")).settings(
     "com.vmunier" %% "play-scalajs-scripts" % "0.3.0",
     "com.typesafe.slick" %% "slick" % "3.1.1",
     "com.typesafe.play" %% "play-slick" % "2.0.2",
-    "com.lihaoyi" %% "upickle" % "0.6.5",
+    "com.lihaoyi" %% "upickle" % "0.7.4",
     "org.webjars" %% "webjars-play" % "2.4.0",
     "org.webjars" % "bootstrap" % "3.3.7",
     "org.webjars" % "jquery" % "1.11.3",
@@ -65,11 +65,11 @@ lazy val exampleClient = (project in file("example-client")).settings(
   persistLauncher := true,
   persistLauncher in Test := false,
   libraryDependencies ++= Seq(
-    "org.scala-js" %%% "scalajs-dom" % "0.9.1",
-    "com.lihaoyi" %%% "scalatags" % "0.6.2",
+    "org.scala-js" %%% "scalajs-dom" % "1.0.0",
+    "com.lihaoyi" %%% "scalatags" % "0.6.8",
     "com.lihaoyi" %%% "scalarx" % "0.2.8",
     "be.doeraene" %%% "scalajs-jquery" % "0.9.1",
-    "com.lihaoyi" %%% "upickle" % "0.6.5",
+    "com.lihaoyi" %%% "upickle" % "0.7.4",
     "com.lihaoyi" %%% "utest" % "0.3.0" % "test"
   )
 ).enablePlugins(ScalaJSPlugin, ScalaJSWeb).
@@ -77,7 +77,7 @@ lazy val exampleClient = (project in file("example-client")).settings(
 
 val exampleSharedJvmSettings = List(
   libraryDependencies ++= Seq(
-    "com.lihaoyi" %% "upickle" % "0.4.4",
+    "com.lihaoyi" %% "upickle" % "0.7.4",
     "com.lihaoyi" %% "utest" % "0.3.0" % "test"
   )
 )

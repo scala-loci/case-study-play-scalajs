@@ -80,6 +80,7 @@ class Student(firstName: String, val subject: String) extends Person(firstName) 
 }
 
 import org.scalajs.dom._
+import org.scalajs.dom.raw._
 
 /**
  * A MessageEvent is sent to clients using WebSockets when data is received from the
@@ -89,7 +90,7 @@ import org.scalajs.dom._
  * MDN
  */
 @js.native
-class MessageEvent extends Event {
+class MessageEvent(typeArg: String, init: js.UndefOr[MessageEventInit]) extends Event(typeArg, init) {
   def source: Window = js.native
 
   def origin: String = js.native
@@ -101,7 +102,14 @@ class MessageEvent extends Event {
    */
   def data: Any = js.native
 
-  def initMessageEvent(typeArg: String, canBubbleArg: Boolean, cancelableArg: Boolean, dataArg: js.Any, originArg: String, lastEventIdArg: String, sourceArg: Window): Unit = js.native
-
   def ports: js.Any = js.native
+}
+
+trait MessageEventInit extends EventInit {
+  var canBubbleArg: js.UndefOr[Boolean] = js.undefined
+  var cancelableArg: js.UndefOr[Boolean] = js.undefined
+  var dataArg: js.UndefOr[js.Any] = js.undefined
+  var originArg: js.UndefOr[String] = js.undefined
+  var lastEventIdArg: js.UndefOr[String] = js.undefined
+  var sourceArg: js.UndefOr[Window] = js.undefined
 }

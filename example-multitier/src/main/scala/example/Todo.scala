@@ -22,7 +22,7 @@ import models.TaskStore
 
   val tasks: Var[Seq[Task]] on Server = Var(Seq.empty[Task])
 
-  val filters = on[Client] local { implicit! =>
+  val filters = on[Client] local {
     Map[String, Task => Boolean](
       ("All", t => true),
       ("Active", !_.done),
@@ -31,29 +31,29 @@ import models.TaskStore
 
   val filter: Local[Var[String]] on Client = Var("All")
 
-  def create(txt: String, done: Boolean = false) = on[Server] { implicit! =>
-    store.create(Task(None, txt, done)) foreach { _ => updateTaskList }
+  def create(txt: String, done: Boolean = false) = on[Server] {
+    store.create(Task(None, txt, done)) foreach { _ => updateTaskList() }
   }
 
-  def update(task: Task) = on[Server] { implicit! =>
-    task.id foreach { _ => store.update(task) foreach { _ => updateTaskList } }
+  def update(task: Task) = on[Server] {
+    task.id foreach { _ => store.update(task) foreach { _ => updateTaskList() } }
   }
 
-  def delete(id: Option[Long]) = on[Server] { implicit! =>
-    id foreach { store.delete(_) foreach { _ => updateTaskList } }
+  def delete(id: Option[Long]) = on[Server] {
+    id foreach { store.delete(_) foreach { _ => updateTaskList() } }
   }
 
-  def clearCompletedTasks() = on[Server] { implicit! =>
-    store.clearCompletedTasks foreach { _ => updateTaskList }
+  def clearCompletedTasks() = on[Server] {
+    store.clearCompletedTasks foreach { _ => updateTaskList() }
   }
 
-  def updateTaskList() = on[Server].local { implicit! =>
+  def updateTaskList() = on[Server].local {
     store.all foreach tasks.set
   }
 
-  on[Server] { implicit! => updateTaskList }
+  on[Server] { updateTaskList() }
 
-  def templateHeader = on[Client] local { implicit! =>
+  def templateHeader = on[Client] local {
     val inputBox = input(
       id:="new-todo",
       placeholder:="What needs to be done?",
@@ -72,7 +72,7 @@ import models.TaskStore
     )
   }
 
-  def templateBody = on[Client] local { implicit! =>
+  def templateBody = on[Client] local {
     section(id:="main")(
       input(
         id:="toggle-all",
@@ -89,7 +89,7 @@ import models.TaskStore
     )
   }
 
-  def templateFooter = on[Client] local { implicit! =>
+  def templateFooter = on[Client] local {
     footer(id:="info")(
       p("Double-click to edit a todo"),
       p("Original version created by ", a(href:="https://github.com/lihaoyi/workbench-example-app/blob/todomvc/src/main/scala/example/ScalaJSExample.scala")("Li Haoyi")),
@@ -97,7 +97,7 @@ import models.TaskStore
     )
   }
 
-  def partList = on[Client] local { implicit! =>
+  def partList = on[Client] local {
     val editing = Var(Option.empty[Task])
 
     Signal.dynamic {
@@ -113,7 +113,7 @@ import models.TaskStore
             },
             div(`class` := "view")(
               ondblclick := { () =>
-                editing set Some(task)
+                editing.set(Some(task))
               },
               input(`class`:= "toggle", `type`:= "checkbox", cursor:= "pointer", onchange:= { () =>
                   remote call update(task.copy(done = !task.done))
@@ -129,7 +129,7 @@ import models.TaskStore
             form(
               onsubmit := { () =>
                 remote call update(task.copy(txt = inputRef.value))
-                editing set None
+                editing.set(None)
                 false
               },
               inputRef
@@ -140,7 +140,7 @@ import models.TaskStore
     }
   }
 
-  def partControls = on[Client] local { implicit! =>
+  def partControls = on[Client] local {
     val done = Signal { tasks.asLocal().count(_.done) }
     val notDone = Signal { tasks.asLocal().length - done() }
 
@@ -155,19 +155,19 @@ import models.TaskStore
             },
             name,
             href:="#",
-            onclick := { () => filter set name }
+            onclick := { () => filter.set(name) }
           ))
         }
       ),
       button(
         id:="clear-completed",
-        onclick := { () => remote call clearCompletedTasks },
+        onclick := { () => remote call clearCompletedTasks() },
         "Clear completed (", done, ")"
       )
     )
   }
 
-  on[Client] { implicit! =>
+  on[Client] {
     dom.document.getElementById("content").appendChild(
       section(id:="todoapp")(
         templateHeader,

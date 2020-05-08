@@ -32,7 +32,7 @@ import models.ChatUserStore
 
   val errorMessage: Local[Evt[(Remote[Client], String)]] on Server = Evt[(Remote[Client], String)]
 
-  val message = on[Server] sbj { implicit! => remote: Remote[Client] =>
+  val message = on[Server] sbj { remote: Remote[Client] =>
     room.robotMessage ||
     systemMessage ||
     errorMessage
@@ -48,7 +48,7 @@ import models.ChatUserStore
       .collect { case Some(message) => message }
   }
 
-  def createMessage(message: String, name: String, avatar: String) = on[Client] local { implicit! =>
+  def createMessage(message: String, name: String, avatar: String) = on[Client] local {
     val ownname = username(remote[Server].connected)
     div(`class`:=s"row message-box${ if(name == ownname) "-me" else "" }")(
       div(`class`:="col-md-2")(
@@ -61,11 +61,11 @@ import models.ChatUserStore
     )
   }
 
-  on[Client] { implicit! =>
+  on[Client] {
     $("#message").keypress((e: dom.KeyboardEvent) => {
       if(!e.shiftKey && e.keyCode == 13) {
         e.preventDefault()
-        userMessage fire $("#message").value().toString
+        userMessage.fire($("#message").value().toString)
         $("#message").value("")
       }
     })
@@ -90,9 +90,9 @@ import models.ChatUserStore
       case _ => ""
     }
 
-  on[Server] { implicit! =>
+  on[Server] {
     remote[Client].joined observe { remote =>
-      room.setupRobot
+      room.setupRobot()
 
       val name = username(remote)
       val user = store.get(name)
@@ -100,17 +100,17 @@ import models.ChatUserStore
       if (name.nonEmpty && user.isEmpty) {
         val user = User(name, room.randomAvatar)
         store.save(user, remote)
-        systemMessage fire ChatMessage(Some(user), "has entered the room")
+        systemMessage.fire(ChatMessage(Some(user), "has entered the room"))
       }
       else {
-        errorMessage fire ((remote, "This username is already used"))
+        errorMessage.fire((remote, "This username is already used"))
         remote.disconnect()
       }
     }
 
     remote[Client].left observe { remote =>
       store.get(username(remote), remote).map { user =>
-        systemMessage fire ChatMessage(Some(user), "has left the room")
+        systemMessage.fire(ChatMessage(Some(user), "has left the room"))
         store.remove(user.name)
       }
     }

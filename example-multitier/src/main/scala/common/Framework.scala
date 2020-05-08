@@ -37,12 +37,12 @@ object Framework {
   }
   implicit def rescalaAttrValue[T: AttrValue, Sig[T] <: Signal[T]] = new AttrValue[Sig[T]]{
     def apply(t: Element, a: Attr, signal: Sig[T]): Unit = {
-      signal.changed += { value => implicitly[AttrValue[T]].apply(t, a, value) }
+      signal.changed observe { value => implicitly[AttrValue[T]].apply(t, a, value) }
     }
   }
   implicit def rescalaStyleValue[T: StyleValue, Sig[T] <: Signal[T]] = new StyleValue[Sig[T]]{
     def apply(t: Element, s: Style, signal: Sig[T]): Unit = {
-      signal.changed += { value => implicitly[StyleValue[T]].apply(t, s, value) }
+      signal.changed observe { value => implicitly[StyleValue[T]].apply(t, s, value) }
     }
   }
 }
